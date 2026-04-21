@@ -360,14 +360,14 @@ function renderScenario(position, startYear) {
   scenarioTitle.textContent = `${position} from ${startYear}`;
   latestYearChip.textContent = `Through ${scenario.latestYear}`;
   salaryGap.textContent = formatCurrency(scenario.annualGap);
-  salaryGapFootnote.textContent = `${formatPercent(scenario.currentGapShare)} below the national-growth benchmark salary`;
+  salaryGapFootnote.textContent = `${formatPercent(scenario.currentGapShare)} below the Average Wage Growth benchmark salary`;
   missedEarnings.textContent = formatCurrency(scenario.cumulativeMissed);
   actualGrowth.textContent = formatPercent(scenario.actualGrowthRate);
   actualGrowthFootnote.textContent = `Actual growth from ${startYear} to ${scenario.latestYear}`;
   benchmarkGrowth.textContent = formatPercent(scenario.benchmarkGrowthRate);
 
   const gapDirection = scenario.growthGap >= 0 ? "behind" : "ahead of";
-  growthGapFootnote.textContent = `${formatPercent(Math.abs(scenario.growthGap))} ${gapDirection} national wage growth`;
+  growthGapFootnote.textContent = `${formatPercent(Math.abs(scenario.growthGap))} ${gapDirection} Average Wage Growth`;
 
   drawChart(scenario.series);
   renderTable(scenario.series);
