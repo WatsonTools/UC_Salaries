@@ -140,7 +140,9 @@ function formatPercent(value) {
 }
 
 function getAvailableYearsForPosition(position) {
-  return salaryData.years.filter((year) => year in salaryData.positions[position].salaries);
+  return salaryData.years.filter(
+    (year) => year !== salaryData.latestYear && year in salaryData.positions[position].salaries,
+  );
 }
 
 function buildCounterfactual(position, startYear) {
