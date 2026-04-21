@@ -264,11 +264,23 @@ select {
   border-top-style: dashed;
 }
 
+.legend-line.baseline {
+  border-top-color: #111111;
+  border-top-style: dashed;
+}
+
 #trajectory-chart {
   display: block;
   width: 100%;
   height: auto;
   margin-top: 16px;
+}
+
+.chart-note {
+  margin: 14px 2px 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.55;
 }
 
 .table-wrap {

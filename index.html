@@ -101,6 +101,30 @@
             <svg id="trajectory-chart" viewBox="0 0 860 360" role="img" aria-label="Salary comparison chart"></svg>
           </div>
 
+          <div class="chart-card">
+            <div class="chart-header">
+              <div>
+                <p class="eyebrow">Inflation Adjusted</p>
+                <h3>Cumulative growth relative to CPI inflation</h3>
+              </div>
+              <div class="legend">
+                <span><i class="legend-line actual"></i>Academic salary relative to CPI</span>
+                <span><i class="legend-line benchmark"></i>Average Wage Growth relative to CPI</span>
+                <span><i class="legend-line baseline"></i>CPI parity line</span>
+              </div>
+            </div>
+            <svg
+              id="real-growth-chart"
+              viewBox="0 0 860 360"
+              role="img"
+              aria-label="Inflation-adjusted salary comparison chart"
+            ></svg>
+            <p class="chart-note" id="real-growth-note">
+              Indexed to 100 in your start year. Values above 100 mean salaries rose faster than
+              CPI inflation; values below 100 mean they fell behind inflation.
+            </p>
+          </div>
+
           <div class="table-card">
             <div class="chart-header">
               <div>

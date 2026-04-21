@@ -10,6 +10,15 @@ const salaryData = {
     2024: 0.048,
     2025: 0.038,
   },
+  cpiInflation: {
+    2019: 0.015,
+    2020: 0.025,
+    2021: 0.015,
+    2022: 0.069,
+    2023: 0.067,
+    2024: 0.04,
+    2025: 0.025,
+  },
   positions: {
     "Assistant Lecturer": {
       level: 1.05,
@@ -118,6 +127,8 @@ const benchmarkGrowth = document.querySelector("#benchmark-growth");
 const growthGapFootnote = document.querySelector("#growth-gap-footnote");
 const tableBody = document.querySelector("#results-table-body");
 const chart = document.querySelector("#trajectory-chart");
+const realGrowthChart = document.querySelector("#real-growth-chart");
+const realGrowthNote = document.querySelector("#real-growth-note");
 
 const currencyFormatter = new Intl.NumberFormat("en-NZ", {
   style: "currency",
@@ -190,6 +201,38 @@ function calculateScenario(position, startYear) {
     growthGap,
     currentGapShare,
   };
+}
+
+function buildRealGrowthSeries(series) {
+  if (!series.length) {
+    return [];
+  }
+
+  const startSalary = series[0].actual;
+  const cpiYears = series.filter((row) => salaryData.cpiInflation[row.year] != null).map((row) => row.year);
+
+  if (!cpiYears.length) {
+    return [];
+  }
+
+  const lastCpiYear = cpiYears[cpiYears.length - 1];
+  const filteredSeries = series.filter((row) => row.year <= lastCpiYear);
+  const realSeries = [];
+  let cumulativeInflationIndex = 1;
+
+  for (const row of filteredSeries) {
+    if (row.year !== filteredSeries[0].year) {
+      cumulativeInflationIndex *= 1 + salaryData.cpiInflation[row.year];
+    }
+
+    realSeries.push({
+      year: row.year,
+      actualIndex: (row.actual / startSalary / cumulativeInflationIndex) * 100,
+      benchmarkIndex: (row.counterfactual / startSalary / cumulativeInflationIndex) * 100,
+    });
+  }
+
+  return realSeries;
 }
 
 function createSvgElement(tagName, attributes = {}) {
@@ -338,6 +381,164 @@ function drawChart(series) {
   });
 }
 
+function drawRealGrowthChart(series) {
+  realGrowthChart.innerHTML = "";
+
+  if (!series.length) {
+    return;
+  }
+
+  const width = 860;
+  const height = 360;
+  const margin = { top: 24, right: 24, bottom: 52, left: 72 };
+  const innerWidth = width - margin.left - margin.right;
+  const innerHeight = height - margin.top - margin.bottom;
+
+  const years = series.map((row) => row.year);
+  const allValues = series.flatMap((row) => [row.actualIndex, row.benchmarkIndex, 100]);
+  const minValue = Math.min(...allValues) - 4;
+  const maxValue = Math.max(...allValues) + 4;
+
+  const xScale = (year) => {
+    if (years.length === 1) {
+      return margin.left + innerWidth / 2;
+    }
+    return (
+      margin.left +
+      ((year - years[0]) / (years[years.length - 1] - years[0])) * innerWidth
+    );
+  };
+
+  const yScale = (value) =>
+    margin.top + innerHeight - ((value - minValue) / (maxValue - minValue || 1)) * innerHeight;
+
+  realGrowthChart.appendChild(
+    createSvgElement("rect", {
+      x: margin.left,
+      y: margin.top,
+      width: innerWidth,
+      height: innerHeight,
+      rx: 18,
+      fill: "#f8f5ef",
+    }),
+  );
+
+  const tickCount = 5;
+  for (let i = 0; i <= tickCount; i += 1) {
+    const value = minValue + ((maxValue - minValue) * i) / tickCount;
+    const y = yScale(value);
+
+    realGrowthChart.appendChild(
+      createSvgElement("line", {
+        x1: margin.left,
+        y1: y,
+        x2: margin.left + innerWidth,
+        y2: y,
+        stroke: "#d7d1c4",
+        "stroke-width": "1",
+      }),
+    );
+
+    const label = createSvgElement("text", {
+      x: margin.left - 12,
+      y: y + 5,
+      "text-anchor": "end",
+      fill: "#5e5a52",
+      "font-size": "12",
+      "font-family": "Space Grotesk, sans-serif",
+    });
+    label.textContent = `${value.toFixed(0)}`;
+    realGrowthChart.appendChild(label);
+  }
+
+  const baselineY = yScale(100);
+  realGrowthChart.appendChild(
+    createSvgElement("line", {
+      x1: margin.left,
+      y1: baselineY,
+      x2: margin.left + innerWidth,
+      y2: baselineY,
+      stroke: "#111111",
+      "stroke-width": "2",
+      "stroke-dasharray": "8 8",
+    }),
+  );
+
+  years.forEach((year) => {
+    const x = xScale(year);
+    realGrowthChart.appendChild(
+      createSvgElement("line", {
+        x1: x,
+        y1: margin.top,
+        x2: x,
+        y2: margin.top + innerHeight,
+        stroke: "#ece6da",
+        "stroke-width": "1",
+      }),
+    );
+    const label = createSvgElement("text", {
+      x,
+      y: margin.top + innerHeight + 28,
+      "text-anchor": "middle",
+      fill: "#5e5a52",
+      "font-size": "12",
+      "font-family": "Space Grotesk, sans-serif",
+    });
+    label.textContent = year;
+    realGrowthChart.appendChild(label);
+  });
+
+  const makePath = (key) =>
+    series
+      .map((row, index) => {
+        const prefix = index === 0 ? "M" : "L";
+        return `${prefix} ${xScale(row.year)} ${yScale(row[key])}`;
+      })
+      .join(" ");
+
+  realGrowthChart.appendChild(
+    createSvgElement("path", {
+      d: makePath("benchmarkIndex"),
+      fill: "none",
+      stroke: "#d97706",
+      "stroke-width": "4",
+      "stroke-linecap": "round",
+      "stroke-linejoin": "round",
+      "stroke-dasharray": "10 10",
+    }),
+  );
+
+  realGrowthChart.appendChild(
+    createSvgElement("path", {
+      d: makePath("actualIndex"),
+      fill: "none",
+      stroke: "#0f766e",
+      "stroke-width": "4",
+      "stroke-linecap": "round",
+      "stroke-linejoin": "round",
+    }),
+  );
+
+  series.forEach((row) => {
+    realGrowthChart.appendChild(
+      createSvgElement("circle", {
+        cx: xScale(row.year),
+        cy: yScale(row.actualIndex),
+        r: "5",
+        fill: "#0f766e",
+      }),
+    );
+    realGrowthChart.appendChild(
+      createSvgElement("circle", {
+        cx: xScale(row.year),
+        cy: yScale(row.benchmarkIndex),
+        r: "5",
+        fill: "#d97706",
+      }),
+    );
+  });
+}
+
 function renderTable(series) {
   tableBody.innerHTML = "";
 
@@ -356,6 +557,7 @@ function renderTable(series) {
 
 function renderScenario(position, startYear) {
   const scenario = calculateScenario(position, startYear);
+  const realGrowthSeries = buildRealGrowthSeries(scenario.series);
 
   scenarioTitle.textContent = `${position} from ${startYear}`;
   latestYearChip.textContent = `Through ${scenario.latestYear}`;
@@ -370,7 +572,19 @@ function renderScenario(position, startYear) {
   growthGapFootnote.textContent = `${formatPercent(Math.abs(scenario.growthGap))} ${gapDirection} Average Wage Growth`;
 
   drawChart(scenario.series);
+  drawRealGrowthChart(realGrowthSeries);
   renderTable(scenario.series);
+
+  if (realGrowthSeries.length) {
+    const lastRealPoint = realGrowthSeries[realGrowthSeries.length - 1];
+    const realDirection = lastRealPoint.actualIndex >= 100 ? "ahead of" : "behind";
+    realGrowthNote.textContent =
+      `Indexed to 100 in ${startYear}. Through ${lastRealPoint.year}, the selected academic salary sits ` +
+      `${realDirection} CPI inflation in real terms; values above 100 beat inflation and values below 100 fall behind.`;
+  } else {
+    realGrowthNote.textContent =
+      "Indexed to 100 in your start year. Values above 100 mean salaries rose faster than CPI inflation; values below 100 mean they fell behind inflation.";
+  }
 }
 
 function syncStartYearOptions(position) {
