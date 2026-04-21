@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Academic Salary Growth Gap</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Source+Serif+4:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <p class="eyebrow">Salary Comparison Tool</p>
+        <h1>How far behind national wage growth has your academic salary fallen?</h1>
+        <p class="hero-copy">
+          Pick the year you started and your academic position. The calculator compares your actual
+          salary path against a counterfactual where that same starting salary had kept pace with
+          national average wage growth.
+        </p>
+      </header>
+
+      <main class="layout">
+        <section class="panel controls-panel">
+          <h2>Inputs</h2>
+          <form id="salary-form" class="controls">
+            <label class="field">
+              <span>Academic position</span>
+              <select id="position-select" name="position"></select>
+            </label>
+
+            <label class="field">
+              <span>Start year</span>
+              <select id="start-year-select" name="startYear"></select>
+            </label>
+          </form>
+
+          <div class="notes">
+            <p>
+              The calculation uses the actual salary for your selected position in the chosen start
+              year as the baseline.
+            </p>
+            <p>
+              The national wage-growth comparison compounds the average annual wage growth from the
+              following year onward.
+            </p>
+          </div>
+        </section>
+
+        <section class="panel results-panel">
+          <div class="results-header">
+            <div>
+              <p class="eyebrow">Summary</p>
+              <h2 id="scenario-title">Assistant Lecturer from 2018</h2>
+            </div>
+            <div class="chip" id="latest-year-chip">Through 2025</div>
+          </div>
+
+          <div class="metrics-grid">
+            <article class="metric-card accent-red">
+              <p class="metric-label">Current annual salary gap</p>
+              <p class="metric-value" id="salary-gap">$0</p>
+              <p class="metric-footnote" id="salary-gap-footnote">0.0% below counterfactual</p>
+            </article>
+
+            <article class="metric-card accent-amber">
+              <p class="metric-label">Cumulative missed earnings</p>
+              <p class="metric-value" id="missed-earnings">$0</p>
+              <p class="metric-footnote">Sum of the yearly shortfall since your start year</p>
+            </article>
+
+            <article class="metric-card accent-blue">
+              <p class="metric-label">Actual salary growth</p>
+              <p class="metric-value" id="actual-growth">0.0%</p>
+              <p class="metric-footnote" id="actual-growth-footnote">From starting salary to latest salary</p>
+            </article>
+
+            <article class="metric-card accent-green">
+              <p class="metric-label">National-growth benchmark</p>
+              <p class="metric-value" id="benchmark-growth">0.0%</p>
+              <p class="metric-footnote" id="growth-gap-footnote">0.0 percentage points ahead</p>
+            </article>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-header">
+              <div>
+                <p class="eyebrow">Trajectory</p>
+                <h3>Actual salary vs national-growth counterfactual</h3>
+              </div>
+              <div class="legend">
+                <span><i class="legend-line actual"></i>Actual salary</span>
+                <span><i class="legend-line benchmark"></i>Counterfactual salary</span>
+              </div>
+            </div>
+            <svg id="trajectory-chart" viewBox="0 0 860 360" role="img" aria-label="Salary comparison chart"></svg>
+          </div>
+
+          <div class="table-card">
+            <div class="chart-header">
+              <div>
+                <p class="eyebrow">Yearly Breakdown</p>
+                <h3>Annual salary gap by year</h3>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Year</th>
+                    <th>Actual salary</th>
+                    <th>Counterfactual salary</th>
+                    <th>Annual gap</th>
+                  </tr>
+                </thead>
+                <tbody id="results-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
