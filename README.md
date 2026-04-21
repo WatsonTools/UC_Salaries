@@ -1,7 +1,5 @@
 # Academic Salary Growth Gap Web App
 
-This is a static web app that can be deployed directly to Netlify.
-
 ## Files
 
 - `index.html`
@@ -19,10 +17,4 @@ This is a static web app that can be deployed directly to Netlify.
   - benchmark growth at national wage growth
 - Shows both a chart and a year-by-year table
 
-## Deploy to Netlify
 
-1. Open Netlify
-2. Create a new site from drag and drop, or connect a repo
-3. Upload the contents of this folder
-
-No build command is needed because this is a plain static site.
